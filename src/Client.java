@@ -23,14 +23,21 @@ public class Client {
                 OutputStream out = socket.getOutputStream()) {
 
                 String line = "Hello up there!!!!";
+                int length = line.length();
+                out.write(length);
                 out.write(line.getBytes());
                 out.flush();
 
-                byte[] data = new byte[32 * 1024];
+                int size = in.read();
+                byte[] data = new byte[size];
                 int readBytes = in.read(data);
-                String inLine = new String(data,0,readBytes);
 
+                if (size != readBytes) throw new Exception("Something went wrong ...");
+
+                String inLine = new String(data, "UTF-8");
                 System.out.printf("Server> %s", inLine);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         } catch (IOException e) {
             e.printStackTrace();

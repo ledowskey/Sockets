@@ -16,22 +16,28 @@ public class Server {
 
         try {
             serverSocket = new ServerSocket(PORT);
-            System.out.println("Server started, witing for connection!");
+            System.out.println("Server started, waiting for connection!");
 
             Socket socket = serverSocket.accept();
-            System.out.println("Accepted. " + socket.getInetAddress());
+            System.out.println("Accepted. " + socket.getRemoteSocketAddress());
 
             try (InputStream in = socket.getInputStream();
                  OutputStream out = socket.getOutputStream()) {
 
-                byte[] buf = new byte[32 * 1024];
-                int readBytes = in.read(buf);
+                int length = in.read();
+                byte[] data = new byte[length];
+                int readBytes = in.read(data);
 
-                String line = new String(buf,0,readBytes);
+                if (length != readBytes) throw new Exception("Some data is corrupted ...");
+
+                String line = new String(data, "UTF-8");
                 System.out.printf("Client> %s", line);
 
+                out.write(line.length());
                 out.write(line.getBytes());
                 out.flush();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         } catch (IOException e) {
             e.printStackTrace();
